@@ -1,29 +1,35 @@
 %Jonathan Braaten
-%GM Project: Cation Exchange of Nafion 211
-%2/20/2017-Final Modifications
-%cation_exchange.m
+%GM Project: Cobalt Cation Exchange of Nafion 117
+%6/1/2017-Final Modifications
+%cation_exchange_117_final.m
 
 clear;
 clc;
 
-%custom inputs
-EW=1020; %gram/mol Equivalent weight of NR-211 Nafion (average of range 990-1050)
-BW=50; %gram/m^2 Basic weight of NR-211 Nafion at 23 C and 50% RH
-percH2O=5; %percentage of mass due to water (23C and 50%RH)-from NR-211 Spec Sheet (Avg between 2 and 8)
+%Nafion N117 Properties
+EW=1100; %gram/mol equivalent weight of N117 Nafion
+BW=360; %gram/m^2 basic weight of N117 Nafion at 23 C and 50% RH
+percH2O=5; %percentage of mass due to water (23C and 50%RH)-from N117 Spec Sheet (http://www.fuelcellstore.com/spec-sheets/nafion-115-117-1110-spec-sheet.pdf)
 
 
-%material constants
-t=25.4e-6; %m thickness of NR-211 Nafion at 23 C and 50% RH
+%N117 Nafion sample constants
+t=183e-6; %m thickness of N117 Nafion at 23 C and 50% RH
 w=.06; %m width of square sample
-A_sample=w^2; %m^2 sample area 28 mm square
+A_sample=w^2; %m^2 sample area 60 mm square
+
+%Doping constants
 M_Co=291.03;    %g/mol molar mass of cobalt nitrate hexahydrate
 M_H=63.01; %g/mol molar mass of nitric acid
-p=.005; %Cation reduction factor from solution to membrane 
+p=.05; %Cation reduction factor from solution to membrane 
 Co_assay=0.98; %assay of cobalt nitrate hexahydrate (purity)
 H_assay=0.70; %assay of nitric acid (purity)
 rho_HNO3=1.413; %g/mL density of nitric acid at 20C 
 
-%fit constants
+%Greszler data points and fit constants (Greszler et al., Modelling the
+%impact of cation contamination in a polymer electrolyte membrane fuel
+%cell, 2009)
+X=[0.0001,0.17,0.89,0.97,0.995,1];
+Y=[0.07,0.145,0.36,0.74,0.86,0.95];
 a=0.0748;
 b=2.513;
 c=-1.041;
@@ -35,7 +41,7 @@ m_sample=A_sample*DW; %grams mass of sample
 N=m_sample/EW; %moles of sulfonic acid/hydrogen sites
 
 %range of membrane charge fractions for exchange target
-zeta_m=[0.01:0.01:0.99];
+zeta_m=[0.05:0.05:0.95];
 
 %calculate moles of material to add to solution
 for i=1:length(zeta_m)
@@ -55,22 +61,14 @@ for i=1:length(zeta_m)
     abs_error(i)=zeta_s1_check(i)-zeta_s2_check(i); %checking error between two zeta curves
     zeta_membrane_check(i)=(N-2*delta_M_Co(i))/(2*delta_M_Co(i)+(N-2*delta_M_Co(i))); %checking membrane charge fraction
 end
+
 figure(1)
-plot(zeta_s2,zeta_m,':','Linewidth',2)
+plot(zeta_s2,zeta_m,':')
 hold on
-% plot(zeta_s1_check,zeta_m,'x')
-% plot(zeta_s2_check,zeta_m,'+')
 axis([0 1 0 1])
-X=[0.0001,0.17,0.89,0.97,0.995,1];
-Y=[0.07,0.145,0.36,0.74,0.86,0.95];
-plot(X,Y,'o','Linewidth',2)
-legend('Fit Curve','Greszler Data Points')
-set(gca,'LineWidth',2,'FontSize',12,'FontWeight','bold');
-xlabel('Solution Proton Site Fraction, \xi_{s}')
-ylabel('Membrane Proton Site Fraction, \xi_{m}')
-hold off
-figure(2)
-plot(zeta_m,zeta_membrane_check)
-figure(3)
-plot(zeta_m,abs_error)
+plot(X,Y,'o')
+legend('Doping Curve','Greszler Data')
+xlabel('Solution Charge Fraction, \xi_{solution}')
+ylabel('Membrane Charge Fraction, \xi_{membrane}')
+
 
